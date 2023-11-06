@@ -22,7 +22,7 @@ for IP in $IP1 $IP2 $IP3; do
 	while true;
 	do
 		sleep 5
-		STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $1)
+		STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $IP1)
 		STATUSUN=$(echo $STATUS | grep -e "UN")
 		echo $STATUS
 		[[ ! -z "$STATUSUN" ]] && break;
