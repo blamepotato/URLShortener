@@ -32,13 +32,13 @@ done
 
 # After the cluster is up, create the keyspace and table on the master node
 ssh student@$MASTER "
-    until docker exec cassandra-node cqlsh -e \"DESCRIBE keyspaces\";
+    until docker exec cassandra-node cqlsh -e \"DESCRIBE keyspaces\" > /dev/null 2>&1;
     do
         echo \"Waiting for Cassandra to start...\"
         sleep 5
     done
 
-    docker exec -it cassandra-node cqlsh -e \"
+    docker exec cassandra-node cqlsh -e \"
         CREATE KEYSPACE IF NOT EXISTS urlshortener
         WITH replication = {
             'class': 'SimpleStrategy',
@@ -52,4 +52,6 @@ ssh student@$MASTER "
             longurl text
         );
     \"
+
+    echo \"Keyspace and table created successfully.\"   
 "
