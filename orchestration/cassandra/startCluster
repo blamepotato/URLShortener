@@ -12,9 +12,9 @@ MASTER="$IP1"
 # Loop through each IP and set up the Cassandra nodes
 for IP in $IP1 $IP2 $IP3; do
     if [ "$IP" = "$MASTER" ]; then
-        COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -p 7000:7000 -p 9042:9042 cassandra"
+        COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -p 7000:7000 -p 9042:9042 -v cassandra-data:/var/lib/cassandra cassandra"
     else
-        COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -p 7000:7000 -p 9042:9042 -e CASSANDRA_SEEDS=$MASTER cassandra"
+        COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -p 7000:7000 -p 9042:9042 -e CASSANDRA_SEEDS=$MASTER -v cassandra-data:/var/lib/cassandra cassandra"
     fi
 
     ssh student@$IP "docker container stop cassandra-node; docker container rm cassandra-node; $COMMAND;"
