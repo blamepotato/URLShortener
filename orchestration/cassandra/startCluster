@@ -22,7 +22,7 @@ for IP in $IP1 $IP2 $IP3; do
 	while true;
 	do
 		sleep 5
-		STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $IP)
+		STATUS=$(docker exec cassandra-node nodetool status | grep -e $IP)
 		STATUSUN=$(echo $STATUS | grep -e "UN")
 		echo $STATUS
 		[[ ! -z "$STATUSUN" ]] && break;
@@ -40,7 +40,7 @@ ssh student@$MASTER "
         NODE_UP_COUNT=\$(docker exec cassandra-node nodetool status | grep -o 'UN' | wc -l)
     done
 
-    docker exec cassandra-node cqlsh -e \"
+    docker exec cassandra-node cqlsh <<EOF
         CREATE KEYSPACE IF NOT EXISTS urlshortener
         WITH replication = {
             'class': 'SimpleStrategy',
@@ -53,7 +53,7 @@ ssh student@$MASTER "
             shorturl text PRIMARY KEY,
             longurl text
         );
-    \"
+EOF
 
     echo \"Keyspace and table created successfully.\"   
 "
