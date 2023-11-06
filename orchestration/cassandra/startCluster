@@ -22,7 +22,7 @@ for IP in $IP1 $IP2 $IP3; do
 	while true;
 	do
 		sleep 5
-		STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $IP)
+		STATUS=$(    | grep -e $IP)
 		STATUSUN=$(echo $STATUS | grep -e "UN")
 		echo $STATUS
 		[[ ! -z "$STATUSUN" ]] && break;
@@ -31,29 +31,4 @@ done
 
 
 # After the cluster is up, create the keyspace and table on the master node
-ssh student@$MASTER "
-    # Check the cluster status to ensure all nodes are up
-    NODE_UP_COUNT=\$(docker exec cassandra-node nodetool status | grep -o 'UN' | wc -l)
-    while [ \"\$NODE_UP_COUNT\" -lt 3 ]; do
-        echo \"Waiting for all nodes to be up...\"
-        sleep 5
-        NODE_UP_COUNT=\$(docker exec cassandra-node nodetool status | grep -o 'UN' | wc -l)
-    done
-
-    docker exec cassandra-node cqlsh <<EOF
-        CREATE KEYSPACE IF NOT EXISTS urlshortener
-        WITH replication = {
-            'class': 'SimpleStrategy',
-            'replication_factor': '2'
-        };
-
-        USE urlshortener;
-
-        CREATE TABLE IF NOT EXISTS urls (
-            shorturl text PRIMARY KEY,
-            longurl text
-        );
-EOF
-
-    echo \"Keyspace and table created successfully.\"   
-"
+./createTable $MASTER
