@@ -32,7 +32,7 @@ done
 
 # After the cluster is up, create the keyspace and table on the master node
 ssh student@$MASTER "
-    until docker exec -it cassandra-node cqlsh -e \"DESCRIBE keyspaces\";
+    until docker exec cassandra-node cqlsh -e \"DESCRIBE keyspaces\";
     do
         echo \"Waiting for Cassandra to start...\"
         sleep 5
