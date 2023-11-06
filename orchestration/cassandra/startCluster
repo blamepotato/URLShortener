@@ -32,10 +32,12 @@ done
 
 # After the cluster is up, create the keyspace and table on the master node
 ssh student@$MASTER "
-    until docker exec cassandra-node cqlsh -e \"DESCRIBE keyspaces\" > /dev/null 2>&1;
-    do
-        echo \"Waiting for Cassandra to start...\"
+    # Check the cluster status to ensure all nodes are up
+    NODE_UP_COUNT=\$(docker exec cassandra-node nodetool status | grep -o 'UN' | wc -l)
+    while [ \"\$NODE_UP_COUNT\" -lt 3 ]; do
+        echo \"Waiting for all nodes to be up...\"
         sleep 5
+        NODE_UP_COUNT=\$(docker exec cassandra-node nodetool status | grep -o 'UN' | wc -l)
     done
 
     docker exec cassandra-node cqlsh -e \"
