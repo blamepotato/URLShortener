@@ -13,9 +13,9 @@ MAX_MEMORY="256mb"
 REPLICA_COUNT=3
 
 # Replace the placeholders in the docker-compose file
-sed -i "s|/path/to/your/persistence|${PERSISTENT_STORAGE_PATH}|g" docker-compose.yml
-sed -i "s|<max-memory>|${MAX_MEMORY}|g" docker-compose.yml
-sed -i "s|<number-of-replicas>|${REPLICA_COUNT}|g" docker-compose.yml
+sed -i "s|/path/to/your/persistence|${PERSISTENT_STORAGE_PATH}|g" ../docker/docker-compose.yml
+sed -i "s|<max-memory>|${MAX_MEMORY}|g" ../docker/docker-compose.yml
+sed -i "s|<number-of-replicas>|${REPLICA_COUNT}|g" ../docker/docker-compose.yml
 
 # Deploy the stack
 docker stack deploy -c docker-compose.yml redis_stack
