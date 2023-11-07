@@ -17,18 +17,8 @@ fi
 
 NODE_TO_REMOVE=$1
 
-# Decommission the node if it is up
 ssh student@$NODE_TO_REMOVE "
-    if docker ps | grep -q cassandra-node; then
-        echo 'Decommissioning the node...'
-        docker exec cassandra-node nodetool decommission
-        docker container stop cassandra-node
-        docker container rm cassandra-node
-    else
-        echo 'Cassandra is not running on this node.'
-        docker container stop cassandra-node
-        docker container rm cassandra-node
-    fi
+    docker container stop cassandra-node
 "
 
 # Remove the node from the cluster using an operational node
@@ -37,6 +27,8 @@ ssh student@$OPERATIONAL_NODE "
     HOST_ID=\$(docker exec cassandra-node nodetool status | grep $NODE_TO_REMOVE | awk '{print \$7}')
     if [ -n \"\$HOST_ID\" ]; then
         docker exec cassandra-node nodetool removenode \$HOST_ID
+    else
+        echo 'Node $NODE_TO_REMOVE is not part of the cluster or already removed.'
     fi
 "
 
