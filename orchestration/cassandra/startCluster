@@ -1,29 +1,55 @@
 #!/bin/bash
-USAGE="Usage: $0 IP1 IP2 IP3 ..."
+# This script sets up a Cassandra cluster with hardcoded IP addresses
 
-if [ "$#" == "0" ]; then
-	echo "$USAGE"
-	exit 1
-fi
+# Hardcoded IP addresses for the nodes
+IP1="10.128.1.70"
+IP2="10.128.2.70"
+IP3="10.128.3.70"
 
-MASTER="$1"
-while (( "$#" )); do
-	if [ "$1" = "$MASTER" ]; 
-	then
-		COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$1 -p 7000:7000 -p 9042:9042 cassandra"
-	else
-		COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$1 -p 7000:7000 -p 9042:9042 -e CASSANDRA_SEEDS=$MASTER cassandra"
-	fi
+# The first IP is considered the master (seed node)
+MASTER="$IP1"
 
-	ssh student@$1 "docker container stop cassandra-node; docker container rm cassandra-node; $COMMAND;"
+# Loop through each IP and set up the Cassandra nodes
+for IP in $IP1 $IP2 $IP3; do
+    if [ "$IP" = "$MASTER" ]; then
+        COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -p 7000:7000 -p 9042:9042 -v cassandra-data:/var/lib/cassandra cassandra"
+    else
+        COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -p 7000:7000 -p 9042:9042 -e CASSANDRA_SEEDS=$MASTER -v cassandra-data:/var/lib/cassandra cassandra"
+    fi
+
+    ssh student@$IP "docker container stop cassandra-node; docker container rm cassandra-node; $COMMAND;"
 	
 	while true;
 	do
 		sleep 5
-		STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $1)
+		STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $IP)
 		STATUSUN=$(echo $STATUS | grep -e "UN")
 		echo $STATUS
 		[[ ! -z "$STATUSUN" ]] && break;
 	done;
-	shift
 done
+
+
+# After the cluster is up, create the keyspace and table on the master node
+ssh student@$MASTER "
+    CREATE_KEYSPACE_CMD='CREATE KEYSPACE IF NOT EXISTS urlshortener WITH replication = { '\''class'\'': '\''SimpleStrategy'\'', '\''replication_factor'\'': '\''2'\'' };'
+    CREATE_TABLE_CMD='USE urlshortener; CREATE TABLE IF NOT EXISTS urls (shorturl text PRIMARY KEY, longurl text);'
+    
+    OUTPUT=\$(docker exec cassandra-node cqlsh -e \"\$CREATE_KEYSPACE_CMD\" 2>&1)
+    EXIT_CODE=\$?
+    echo \"\$OUTPUT\"
+    if [ \$EXIT_CODE -ne 0 ]; then
+        echo 'Failed to create keyspace.'
+        exit 1
+    fi
+    
+    OUTPUT=\$(docker exec cassandra-node cqlsh -e \"\$CREATE_TABLE_CMD\" 2>&1)
+    EXIT_CODE=\$?
+    echo \"\$OUTPUT\"
+    if [ \$EXIT_CODE -ne 0 ]; then
+        echo 'Failed to create table.'
+        exit 1
+    fi
+    
+    echo 'Keyspace and table created successfully.'
+"
