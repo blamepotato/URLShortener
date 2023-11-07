@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  redis-primary:
+    image: redis:latest
+    command: redis-server --appendonly yes --maxmemory <max-memory> --maxmemory-policy allkeys-lru
+    volumes:
+      volumes:
+      - redis_data:/virtual/wanggon4:/redis_data
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - redis-network
+
+  python-redis-api:
+    image: python-redis-api
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - "~/a2group02:/cache"
+    networks:
+      - redis-network
+
+networks:
+  redis-network:
+    driver: overlay
+
+volumes:
+  redis_data:
+    external: true
