@@ -32,4 +32,4 @@ ssh student@$OPERATIONAL_NODE "
     fi
 "
 
-echo "Node with IP $NODE_TO_REMOVE has been decommissioned and removed from the Cassandra cluster."
+echo "Node with IP $NODE_TO_REMOVE has been removed from the Cassandra cluster."
