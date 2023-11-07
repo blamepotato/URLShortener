@@ -22,10 +22,10 @@ ssh student@$NEW_NODE_IP "
 # Check if the new node is up and running
 while true; do
     sleep 5
-    STATUS=$(ssh student@$NEW_NODE_IP "docker exec -it cassandra-node nodetool status | grep -e $NEW_NODE_IP")
+    STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $NEW_NODE_IP)
     STATUSUN=$(echo $STATUS | grep -e "UN")
     echo $STATUS
-    [[ ! -z "$STATUSUN" ]] && break
-done
+    [[ ! -z "$STATUSUN" ]] && break;
+done;
 
 echo "New node with IP $NEW_NODE_IP added to the Cassandra cluster and is up and running."
