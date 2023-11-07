@@ -35,8 +35,6 @@ ssh student@$OPERATIONAL_NODE "
     HOST_ID=\$(docker exec cassandra-node nodetool status | grep $NODE_TO_REMOVE | awk '{print \$7}')
     if [ -n \"\$HOST_ID\" ]; then
         docker exec cassandra-node nodetool removenode \$HOST_ID
-    else
-        echo 'Node not found in the cluster status. It might have been already removed or never joined.'
     fi
 "
 
