@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Check if an IP address is passed
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <NodeIPToRemove>"
+    exit 1
+fi
+
+# Default operational node
+OPERATIONAL_NODE="10.128.1.70"
+
+# Check if the first argument is the same as the operational node
+if [ "$1" = "$OPERATIONAL_NODE" ]; then
+    # Switch operational node to the second seed node
+    OPERATIONAL_NODE="10.128.2.70"
+fi
+
+NODE_TO_REMOVE=$1
+
+# Decommission the node if it is up
+ssh student@$NODE_TO_REMOVE "
+    if docker ps | grep -q cassandra-node; then
+        echo 'Decommissioning the node...'
+        docker exec cassandra-node nodetool decommission
+        docker container stop cassandra-node
+        docker container rm cassandra-node
+    else
+        echo 'Cassandra is not running on this node.'
+    fi
+"
+
+# Remove the node from the cluster using an operational node
+ssh student@$OPERATIONAL_NODE "
+    echo 'Removing the node from the cluster...'
+    HOST_ID=\$(docker exec cassandra-node nodetool status | grep $NODE_TO_REMOVE | awk '{print \$7}')
+    if [ -n \"\$HOST_ID\" ]; then
+        docker exec cassandra-node nodetool removenode \$HOST_ID
+    else
+        echo 'Node not found in the cluster status. It might have been already removed or never joined.'
+    fi
+"
+
+echo "Node with IP $NODE_TO_REMOVE has been decommissioned and removed from the Cassandra cluster."

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Check if an IP address is passed
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <NewNodeIP>"
+    exit 1
+fi
+
+NEW_NODE_IP=$1
+SEED_NODES="10.128.1.70,10.128.2.70" # Seed nodes IPs
+
+# Command to start a new Cassandra node with the new IP and seed nodes IPs
+ssh student@$NEW_NODE_IP "
+    docker run --name cassandra-node -d \
+    -e CASSANDRA_BROADCAST_ADDRESS=$NEW_NODE_IP \
+    -e CASSANDRA_SEEDS=$SEED_NODES \
+    -p 7000:7000 -p 9042:9042 \
+    -v cassandra-data:/var/lib/cassandra \
+    cassandra
+"
+
+# Check if the new node is up and running
+while true; do
+    sleep 5
+    STATUS=$(ssh student@$NEW_NODE_IP "docker exec -it cassandra-node nodetool status | grep -e $NEW_NODE_IP")
+    STATUSUN=$(echo $STATUS | grep -e "UN")
+    echo $STATUS
+    [[ ! -z "$STATUSUN" ]] && break
+done
+
+echo "New node with IP $NEW_NODE_IP added to the Cassandra cluster and is up and running."
