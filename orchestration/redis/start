@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Define the path to the volume storage
+PERSISTENT_STORAGE_PATH="/path/to/your/persistence"
+
+# Ensure the directory exists
+mkdir -p ${PERSISTENT_STORAGE_PATH}
+
+# Set the maximum memory you want Redis to use, for example "256mb"
+MAX_MEMORY="256mb"
+
+# Set the number of replica instances
+REPLICA_COUNT=3
+
+# Replace the placeholders in the docker-compose file
+sed -i "s|/path/to/your/persistence|${PERSISTENT_STORAGE_PATH}|g" docker-compose.yml
+sed -i "s|<max-memory>|${MAX_MEMORY}|g" docker-compose.yml
+sed -i "s|<number-of-replicas>|${REPLICA_COUNT}|g" docker-compose.yml
+
+# Deploy the stack
+docker stack deploy -c docker-compose.yml redis_stack
+
+# Check the services
+docker service ls
