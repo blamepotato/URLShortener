@@ -8,7 +8,7 @@ services:
       - "6379:6379"
     volumes:
       volumes:
-      - /var/lib/redis:/data
+      - redis-data:/var/lib/redis
     deploy:
       placement:
         constraints: [node.role == manager]
