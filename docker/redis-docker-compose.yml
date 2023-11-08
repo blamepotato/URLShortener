@@ -4,6 +4,8 @@ services:
   redis-primary:
     image: redis:latest
     command: redis-server --appendonly yes --maxmemory <max-memory> --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
     volumes:
       volumes:
       - /var/lib/redis:/data
