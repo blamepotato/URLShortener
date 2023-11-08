@@ -17,9 +17,6 @@ if [ "$ROLE" = "init" ]; then
     docker swarm leave --force
     # Initialize the swarm on the manager node
     docker swarm init --advertise-addr "$IP1"
-    docker build -t python-redis-api . 
-
-    docker stack deploy -c redis-docker-compose.yml redis_stack
 
 
 elif [ "$ROLE" = "join" ]; then
@@ -27,6 +24,9 @@ elif [ "$ROLE" = "join" ]; then
     for IP in $$IP2 $IP3 $IP4; do
         ssh student@$IP "docker swarm leave --force; docker swarm join --token "$JOIN_TOKEN" "$IP1":2377"
     done;
+    docker build -t python-redis-api . 
+
+    docker stack deploy -c redis-docker-compose.yml redis_stack
 
 else
     echo "Unknown role: $ROLE"
