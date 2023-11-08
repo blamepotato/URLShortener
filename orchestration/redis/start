@@ -22,7 +22,7 @@ if [ "$ROLE" = "init" ]; then
     # Create the persistent storage path
     mkdir -p "${PERSISTENT_STORAGE_PATH}"
 
-    docker stack deploy -c ../docker/redis-docker-compose.yml redis_stack
+    docker stack deploy -c ../../docker/redis-docker-compose.yml redis_stack
 
 
 elif [ "$ROLE" = "join" ]; then
