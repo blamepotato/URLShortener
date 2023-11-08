@@ -16,10 +16,21 @@ services:
         condition: on-failure
     networks:
       - redis-network
+    
+  redis-replica:
+    image: redis:latest
+    command: redis-server --replicaof redis-primary 6379 --maxmemory <max-memory> --maxmemory-policy allkeys-lru
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    networks:
+      - redis-network
 
   python-redis-api:
     image: python-redis-api
-    command: redis-server --replicaof redis-primary 6379 --maxmemory <max-memory> --maxmemory-policy allkeys-lru
     depends_on:
       - redis-primary
     deploy:
