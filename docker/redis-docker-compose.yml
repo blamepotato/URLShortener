@@ -23,9 +23,7 @@ services:
     depends_on:
       - redis-primary
     deploy:
-      placement:
-          constraints: [node.role == worker]
-      replicas: 3
+      replicas: 4
       restart_policy:
         condition: on-failure
     networks:
@@ -33,5 +31,4 @@ services:
 
 networks:
   redis-network:
-    driver: overlay
     
