@@ -19,9 +19,6 @@ if [ "$ROLE" = "init" ]; then
     # Initialize the swarm on the manager node
     docker swarm init --advertise-addr "$IP1"
 
-    # Create the persistent storage path
-    mkdir -p "${PERSISTENT_STORAGE_PATH}"
-
     docker stack deploy -c redis-docker-compose.yml redis_stack
 
 

@@ -7,7 +7,6 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      volumes:
       - ~/a2group02/redis:/redis-data
     deploy:
       placement:
@@ -37,5 +36,5 @@ networks:
     driver: overlay
 
 volumes:
-  redis_data:
-    external: false
+  ~/a2group02/redis:
+    external: true
