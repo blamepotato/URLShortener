@@ -13,15 +13,15 @@ session = cluster.connect('urlshortener')
 
 @app.route('/', methods=['PUT'])
 def long_to_short():
-    short = request.args.get('short')
-    long = request.args.get('long')
+    shorturl = request.args.get('short')
+    longurl = request.args.get('long')
     # returns 400 if either short or long is not provided
-    if not short or not long:
+    if not shorturl or not longurl:
         return 'Bad request', 400
     # Store in Cassandra
-    session.execute("INSERT INTO urls (shorturl, longurl) VALUES (%s, %s)", (short, long))
+    session.execute("INSERT INTO urls (shorturl, longurl) VALUES (%s, %s)", (shorturl, longurl))
     # Store in Redis
-    cache.set(short, long)
+    cache.set(shorturl, longurl)
     return 'OK', 200
 
 @app.route('/<shorturl>', methods=['GET'])
