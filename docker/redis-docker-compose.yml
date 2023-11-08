@@ -34,8 +34,4 @@ services:
 networks:
   redis-network:
     driver: overlay
-
-volumes:
-  /home/student/a2group02/redis-data:
-    external: false
     
