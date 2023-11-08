@@ -10,7 +10,7 @@ IP4="10.128.4.70"
 # ssh into primiary node and init docker swarm
 ROLE=$1
 JOIN_TOKEN=$2
-PERSISTENT_STORAGE_PATH="/var/lib/redis"
+PERSISTENT_STORAGE_PATH="~/a2group02/redis"
 
 # Loop through each IP and set up the redis cache node
 if [ "$ROLE" = "init" ]; then
