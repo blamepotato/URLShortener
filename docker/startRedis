@@ -14,11 +14,10 @@ PERSISTENT_STORAGE_PATH="~/a2group02/redis"
 
 # Loop through each IP and set up the redis cache node
 if [ "$ROLE" = "init" ]; then
-    docker build -t python-redis-api .
     docker swarm leave --force
     # Initialize the swarm on the manager node
     docker swarm init --advertise-addr "$IP1"
-
+    docker build -t python-redis-api . 
 
     docker stack deploy -c redis-docker-compose.yml redis_stack
 
