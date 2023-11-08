@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - /home/student/a2group02/redis-data:/data
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -36,6 +36,6 @@ networks:
     driver: overlay
 
 volumes:
-  redis-data:
-    external: true
+  /home/student/a2group02/redis-data:
+    external: false
     
