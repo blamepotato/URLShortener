@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /home/student/a2group02/redis-data:/data
+      - "/home/student/a2group02/redis-data:/data"
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -20,6 +20,8 @@ services:
   redis-replica:
     image: redis:latest
     command: redis-server --replicaof redis-primary 6379 --maxmemory <max-memory> --maxmemory-policy allkeys-lru
+    depends_on:
+      - redis-primary
     deploy:
       placement:
         constraints: [node.role == worker]
@@ -31,12 +33,12 @@ services:
 
   python-redis-api:
     image: python-redis-api
-    depends_on:
-      - redis-primary
     deploy:
       replicas: 4
       restart_policy:
         condition: on-failure
+    volumes:
+      - "/home/student/a2group02/app:/app"
     networks:
       - redis-network
 
