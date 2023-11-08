@@ -18,6 +18,7 @@ if [ "$ROLE" = "init" ]; then
     docker swarm leave --force
     # Initialize the swarm on the manager node
     docker swarm init --advertise-addr "$IP1"
+    
 
     docker stack deploy -c redis-docker-compose.yml redis_stack
 
