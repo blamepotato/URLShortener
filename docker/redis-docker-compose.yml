@@ -6,7 +6,7 @@ services:
     command: redis-server --appendonly yes --maxmemory <max-memory> --maxmemory-policy allkeys-lru
     volumes:
       volumes:
-      - redis_data:/virtual/wanggon4:/redis_data
+      - /var/lib/redis:/data
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -18,12 +18,15 @@ services:
 
   python-redis-api:
     image: python-redis-api
+    command: redis-server --replicaof redis-primary 6379 --maxmemory <max-memory> --maxmemory-policy allkeys-lru
+    depends_on:
+      - redis-primary
     deploy:
+      placement:
+          constraints: [node.role == worker]
       replicas: 4
       restart_policy:
         condition: on-failure
-    volumes:
-      - "~/a2group02:/cache"
     networks:
       - redis-network
 
@@ -33,4 +36,4 @@ networks:
 
 volumes:
   redis_data:
-    external: true
+    external: false

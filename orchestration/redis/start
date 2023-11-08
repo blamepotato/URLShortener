@@ -1,19 +1,36 @@
 #!/bin/bash
+# This script sets up a Redis cluster with hardcoded IP addresses
 
-# Ensure the directory exists
-mkdir -p ${PERSISTENT_STORAGE_PATH}
+# Hardcoded IP addresses for the nodes
+IP1="10.128.1.70"
+IP2="10.128.2.70"
+IP3="10.128.3.70"
+IP4="10.128.4.70"
 
-# Set the maximum memory you want Redis to use, for example "256mb"
-MAX_MEMORY="256mb"
+# ssh into primiary node and init docker swarm
+ROLE=$1
+JOIN_TOKEN=$2
+PERSISTENT_STORAGE_PATH="/var/lib/redis"
 
-# Set the number of replica instances
-REPLICA_COUNT=3
+# Loop through each IP and set up the redis cache node
+if [ "$ROLE" = "init" ]; then
+    # Initialize the swarm on the manager node
+    docker swarm init --advertise-addr "$IP1"
 
-# Replace the placeholders in the docker-compose file
-sed -i "s|<max-memory>|${MAX_MEMORY}|g" ../docker/docker-compose.yml
+    # Create the persistent storage path
+    mkdir -p "${PERSISTENT_STORAGE_PATH}"
 
-# Deploy the stack
-docker stack deploy -c docker-compose.yml redis_stack
+    docker stack deploy -c ../docker/redis-docker-compose.yml redis_stack
 
-# Check the services
-docker service ls
+
+elif [ "$ROLE" = "join" ]; then
+    # Join the swarm as a worker node
+    for IP in $$IP2 $IP3 $IP4; do
+        ssh student@IP "docker swarm join --token "$JOIN_TOKEN" "$IP1":2377"
+    done;
+
+else
+    echo "Unknown role: $ROLE"
+    echo "Usage: $0 init <MANAGER-IP> | join <MANAGER-IP> <WORKER-JOIN-TOKEN>"
+    exit 1
+fi
