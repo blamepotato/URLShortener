@@ -26,11 +26,11 @@ if [ "$ROLE" = "init" ]; then
 elif [ "$ROLE" = "join" ]; then
     # Join the swarm as a worker node
     for IP in $$IP2 $IP3 $IP4; do
-        ssh student@$IP "docker build -t python-redis-api .;docker swarm leave --force; docker swarm join --token "$JOIN_TOKEN" "$IP1":2377"
+        ssh student@$IP "docker swarm leave --force; docker swarm join --token "$JOIN_TOKEN" "$IP1":2377"
     done;
 
 else
     echo "Unknown role: $ROLE"
-    echo "Usage: $0 init <MANAGER-IP> | join <MANAGER-IP> <WORKER-JOIN-TOKEN>"
+    echo "Usage: $0 init | join <WORKER-JOIN-TOKEN>"
     exit 1
 fi
