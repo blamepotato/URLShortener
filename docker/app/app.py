@@ -8,7 +8,7 @@ app = Flask(__name__)
 # Configure Redis connection
 cache = redis.Redis(host='redis-primary', db=0, port=6379, decode_responses=True)
 
-profile = ExecutionProfile(
+profile = Cluster.ExecutionProfile(
 	load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1']),
 	retry_policy=DowngradingConsistencyRetryPolicy(),
 	consistency_level=ConsistencyLevel.LOCAL_QUORUM,
