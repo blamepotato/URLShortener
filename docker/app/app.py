@@ -1,6 +1,9 @@
 from flask import Flask, request, redirect
 import redis
 from cassandra.cluster import Cluster, ExecutionProfile
+import cassandra.policies as cp
+import cassandra.query as cq
+from cassandra import ConsistencyLevel
 
 
 app = Flask(__name__)
@@ -9,12 +12,12 @@ app = Flask(__name__)
 cache = redis.Redis(host='redis-primary', db=0, port=6379, decode_responses=True)
 
 profile = ExecutionProfile(
-	load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1']),
-	retry_policy=DowngradingConsistencyRetryPolicy(),
+	load_balancing_policy=cp.WhiteListRoundRobinPolicy(['127.0.0.1']),
+	retry_policy=cp.DowngradingConsistencyRetryPolicy(),
 	consistency_level=ConsistencyLevel.LOCAL_QUORUM,
 	serial_consistency_level=ConsistencyLevel.LOCAL_SERIAL,
 	request_timeout=15,
-	row_factory=tuple_factory
+	row_factory=cq.tuple_factory
 )
 
 cluster = Cluster(execution_profiles={EXEC_PROFILE_DEFAULT: profile})
