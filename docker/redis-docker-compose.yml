@@ -30,14 +30,16 @@ services:
     networks:
       - redis-network
 
-  python-redis-api:
-    image: python-redis-api
+  python-app:
+    image: python-app
     deploy:
       replicas: 4
       restart_policy:
         condition: on-failure
     volumes:
       - "/home/student/a2group02/docker/app:/app"
+    ports:
+      - "4000:80"
     networks:
       - redis-network
 

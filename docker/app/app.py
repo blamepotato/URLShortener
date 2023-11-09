@@ -2,6 +2,7 @@ from flask import Flask, request, redirect
 import redis
 from cassandra.cluster import Cluster
 
+
 app = Flask(__name__)
 
 # Configure Redis connection
