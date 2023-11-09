@@ -6,7 +6,7 @@ from cassandra.cluster import Cluster
 app = Flask(__name__)
 
 # Configure Redis connection
-cache = redis.Redis(host='redis', db=0, port=6379, decode_responses=True)
+cache = redis.Redis(host='redis-primary', db=0, port=6379, decode_responses=True)
 
 # Configure Cassandra connection
 cluster = Cluster(['10.128.1.70', '10.128.2.70', '10.128.3.70'])
