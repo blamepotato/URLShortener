@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect
 import redis
-from cassandra.cluster import Cluster, ExecutionProfile
+from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT
 import cassandra.policies as cp
 import cassandra.query as cq
 from cassandra import ConsistencyLevel
