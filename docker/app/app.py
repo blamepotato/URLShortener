@@ -28,7 +28,7 @@ session = cluster.connect('urlshortener')
 @app.route('/', methods=['PUT'])
 def long_to_short():
     shorturl = request.args['short']
-    longurl = request.args.args['long']
+    longurl = request.args['long']
     # returns 400 if either short or long is not provided
     if not shorturl or not longurl:
         return 'Bad request', 400
