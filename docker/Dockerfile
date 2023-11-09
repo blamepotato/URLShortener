@@ -18,6 +18,7 @@ ADD app /app
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 RUN apt-get update
 RUN apt-get -y install vim
+RUN apt-get -y install libev-dev
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
@@ -27,6 +28,6 @@ ENV NAME World
 
 # Run python app.py when the container launches
 # This happens if no command is specified
-#CMD ["tail", "-f", "/dev/null"]
+# CMD ["tail", "-f", "/dev/null"]
 CMD ["python", "app.py"]
 
