@@ -17,7 +17,7 @@ ADD app /app
 # RUN during image build
 RUN apt-get update
 RUN apt-get -y install vim
-# RUN apt-get -y install libev-dev
+RUN apt-get -y install libev-dev
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 
