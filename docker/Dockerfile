@@ -27,6 +27,6 @@ ENV NAME World
 
 # Run python app.py when the container launches
 # This happens if no command is specified
-CMD ["tail", "-f", "/dev/null"]
+#CMD ["tail", "-f", "/dev/null"]
 CMD ["python", "app.py"]
 
