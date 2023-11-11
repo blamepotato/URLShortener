@@ -7,11 +7,15 @@ IP3="10.128.3.70"
 IP4="10.128.4.70"
 
 # Loop through each  IP and stop/remove the redis workers
+echo "Stopping and removing Redis workers..."
 for IP in $IP1 $IP2 $IP3 $IP4; do
     ssh student@$IP "docker swarm leave --force"
 done
+echo "Done."
 
 # Loop through each IP and stop/remove the Cassandra containers
+echo "Stopping and removing Cassandra containers..."
 for IP in $IP1 $IP2 $IP3 $IP4; do
     ssh student@$IP "docker container stop cassandra-node; docker container rm cassandra-node;"
 done
+echo "Done."

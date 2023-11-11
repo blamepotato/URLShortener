@@ -12,6 +12,7 @@ SEEDS="$IP1,$IP2"
 
 #################### Start Cassandra cluster ###############
 # Loop through each IP and set up the Cassandra nodes
+echo "Setting up Cassandra nodes..."
 for IP in $IP1 $IP2 $IP3; do
     # All nodes will have the SEEDS environment variable set to the list of seed nodes
     COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -e CASSANDRA_SEEDS=$SEEDS -p 7000:7000 -p 9042:9042 -v cassandra-data:/var/lib/cassandra cassandra"
@@ -52,6 +53,7 @@ ssh student@$IP1 "
 "
 
 #################### Start Redis Cluster ###################
+echo "Setting up Redis cluster..."
 # Leave the swarm if already part of it
 docker swarm leave --force
 
