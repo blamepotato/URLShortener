@@ -1,0 +1,71 @@
+#!/bin/bash
+# This script sets up a Redis cluster and initializes a Docker Swarm
+
+# Hardcoded IP addresses for the nodes
+IP1="10.128.1.70"
+IP2="10.128.2.70"
+IP3="10.128.3.70"
+IP4="10.128.4.70"
+
+# IP1 and IP2 are considered seed nodes
+SEEDS="$IP1,$IP2"
+
+#################### Start Cassandra cluster ###############
+# Loop through each IP and set up the Cassandra nodes
+for IP in $IP1 $IP2 $IP3; do
+    # All nodes will have the SEEDS environment variable set to the list of seed nodes
+    COMMAND="docker run --name cassandra-node -d -e CASSANDRA_BROADCAST_ADDRESS=$IP -e CASSANDRA_SEEDS=$SEEDS -p 7000:7000 -p 9042:9042 -v cassandra-data:/var/lib/cassandra cassandra"
+
+    ssh student@$IP "docker container stop cassandra-node; docker container rm cassandra-node; $COMMAND;"
+    
+    while true; do
+        sleep 5
+        STATUS=$(docker exec -it cassandra-node nodetool status | grep -e $IP)
+        STATUSUN=$(echo $STATUS | grep -e "UN")
+        echo $STATUS
+        [[ ! -z "$STATUSUN" ]] && break;
+    done;
+done
+
+# After the cluster is up, create the keyspace and table on the master node
+ssh student@$IP1 "
+    CREATE_KEYSPACE_CMD='CREATE KEYSPACE IF NOT EXISTS urlshortener WITH replication = { '\''class'\'': '\''SimpleStrategy'\'', '\''replication_factor'\'': '\''2'\'' };'
+    CREATE_TABLE_CMD='USE urlshortener; CREATE TABLE IF NOT EXISTS urls (shorturl text PRIMARY KEY, longurl text);'
+    
+    OUTPUT=\$(docker exec cassandra-node cqlsh -e \"\$CREATE_KEYSPACE_CMD\" 2>&1)
+    EXIT_CODE=\$?
+    echo \"\$OUTPUT\"
+    if [ \$EXIT_CODE -ne 0 ]; then
+        echo 'Failed to create keyspace.'
+        exit 1
+    fi
+    
+    OUTPUT=\$(docker exec cassandra-node cqlsh -e \"\$CREATE_TABLE_CMD\" 2>&1)
+    EXIT_CODE=\$?
+    echo \"\$OUTPUT\"
+    if [ \$EXIT_CODE -ne 0 ]; then
+        echo 'Failed to create table.'
+        exit 1
+    fi
+    
+    echo 'Keyspace and table created successfully.'
+"
+
+#################### Start Redis Cluster ###################
+# Leave the swarm if already part of it
+docker swarm leave --force
+
+# Initialize the swarm on the primary node and capture the worker join token
+JOIN_TOKEN=$(docker swarm init --advertise-addr "$IP1" | grep "docker swarm join --token" | awk '{ print $5 }')
+
+# Join the other nodes to the swarm as worker nodes
+for IP in $IP2 $IP3 $IP4; do
+    ssh student@$IP "docker swarm leave --force; docker swarm join --token $JOIN_TOKEN $IP1:2377"
+done
+
+# Build the Python app Docker image
+docker build -t python-app .
+
+# Deploy the stack
+docker stack deploy -c redis-docker-compose.yml redis_stack
+
